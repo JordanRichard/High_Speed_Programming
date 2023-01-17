@@ -21,29 +21,40 @@ void matrixMult(int matrixSize)
 	// Seeds the random number generator
 	srand(time(NULL));
 
-	int arr1[matrixSize][matrixSize];
-	int arr2[matrixSize][matrixSize];
+	//Allocates heap memory for the matrix
+	int *arr1 = (int *)malloc(matrixSize * matrixSize * sizeof(int));	
+	//int arr2[matrixSize][matrixSize];
 
+	
 	// Populates each array
 	for(int i = 0; i < matrixSize; i++)
 	{
 		for(int j = 0; j< matrixSize; j++)
 		{
-			arr1[i][j] = rand();
-			arr2[i][j] = rand();
+			*(arr1 + i*matrixSize + j) = rand() % 10;
+			//arr2[i][j] = rand();
 		}
 	}
+	
 
-	// Prints out the array
-	/*
-	int c=0;
+	//Pretty-prints a matrix to the screen
+	printf("-----------------------------\n");
 	for(int i = 0; i < matrixSize; i++)
 	{
-		printf("Value %i:",i);
-		printf("%i\n",arr1[i]);
-		c++;
+		for(int j = 0; j< matrixSize; j++)
+		{
+			int val = *(arr1 + i*matrixSize + j);	//Finds next entry based on pointer aritihmetic
+			printf("[%i] ",val);
+
+			//arr2[i][j] = rand();
+		}
+		printf("\n");
 	}
-	*/
+	printf("-----------------------------\n");
+
+
+	free(arr1);
+	printf("Memory de-allocated.\n");
 }
 
 int main()
