@@ -2,17 +2,18 @@
 #include <stdlib.h>
 #include <time.h>
 
-/*
-#		#Author: Jordan Alexander RIchard
-#		#SN: 3606213
-#
-#		Name: a1q1.c 	
-#		Purpose: 
-#
-#		This program randomly generates two NxN matrices based on a size specified by the 
-#		user. Outputs are saved to a file.
-#
-*/
+// ****************************************************************************
+//		Author: Jordan Alexander RIchard
+//		SN: 3606213
+//
+//		Name: a1q1.c 	
+//		Purpose: 
+//
+//		This program randomly generates two NxN matrices based on a size 
+//		specified by the user. Multiplies these matrices together and stores
+//		resultant matrix to a file.
+//
+// ****************************************************************************
 
 
 void matrixMult(int matrixSize)
@@ -22,7 +23,7 @@ void matrixMult(int matrixSize)
 	// Seeds the random number generator
 	srand(time(NULL));
 
-	//Allocates heap memory for the matrix
+	//Allocates heap memory for the matrices
 	int *arr1 = (int *)malloc(matrixSize * matrixSize * sizeof(int));	
 	int *arr2 = (int *)malloc(matrixSize * matrixSize * sizeof(int));
 	int *arr3 = (int *)malloc(matrixSize * matrixSize * sizeof(int));
@@ -50,7 +51,6 @@ void matrixMult(int matrixSize)
 		}
 		printf("\n");
 	}
-
 
 	printf("----------Matrix B---------------\n");
 	for(int i = 0; i < matrixSize; i++)
@@ -84,6 +84,7 @@ void matrixMult(int matrixSize)
 		printf("\n");
 	}
 
+
 	// Pretty-Print Resultant matrix
 	printf("----------Matrix AB--------------\n");
 	for(int i = 0; i < matrixSize; i++)
@@ -108,7 +109,6 @@ void matrixMult(int matrixSize)
 
 int main()
 {
-	// Takes user input to call function
 	int n;
 	printf("Please input a number\n");
 	scanf("%i", &n);				
