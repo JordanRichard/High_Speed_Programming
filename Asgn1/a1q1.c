@@ -35,8 +35,8 @@ void matrixMult(int matrixSize)
 		for(int j = 0; j< matrixSize; j++)
 		{
 			//Generates integer of max 10
-			*(arr1 + i*matrixSize + j) = rand() % 10;	
-			*(arr2 + i*matrixSize + j) = rand() % 10;
+			*(arr1 + i * matrixSize + j) = rand() % 10;	
+			*(arr2 + i * matrixSize + j) = rand() % 10;
 		}
 	}
 	
