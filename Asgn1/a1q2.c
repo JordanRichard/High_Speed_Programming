@@ -8,9 +8,7 @@
 //		Name: 		a1q2.c 	
 //		Purpose: 
 //
-//		This program randomly generates two NxN matrices based on a size 
-//		specified by the user. Multiplies these matrices together and stores
-//		resultant matrix to a file.
+//		Takes an input matrix from a provided file.
 //
 // ****************************************************************************
 
@@ -19,18 +17,18 @@ void sumSquares()
 	FILE *infile = fopen("data3.txt","r");
 	int elems;
 
-	fscanf(infile,"%i",&elems);	//Finds the number of elements
+	fscanf(infile,"%i", &elems);	//Finds the number of elements
 
 	int *X = (int *)malloc(elems * elems * sizeof(int));
 	
 	for(int i = 0; i < elems; i++)
 	{
-		for(int j = 0; j< elems; j++)
+		for(int j = 0; j < elems; j++)
 		{
 			int Xi;
-			fscanf(infile,"%i",&Xi);
+			fscanf(infile,"%i", &Xi);
 			*(X + i * elems + j) = Xi;
-			printf("[%i]",Xi);	
+			printf("[%i]", Xi);	
 		}
 	}
 
