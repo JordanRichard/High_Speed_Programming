@@ -3,10 +3,10 @@
 #include <time.h>
 
 // ****************************************************************************
-//		Author: Jordan Alexander RIchard
-//		SN: 3606213
+//		Author: 	Jordan Alexander Richard
+//		SN: 		3606213
 //
-//		Name: a1q1.c 	
+//		Name: 		a1q1.c 	
 //		Purpose: 
 //
 //		This program randomly generates two NxN matrices based on a size 
@@ -34,86 +34,86 @@ void matrixMult(int matrixSize)
 	{
 		for(int j = 0; j< matrixSize; j++)
 		{
-			*(arr1 + i*matrixSize + j) = rand() % 10;
+			//Generates integer of max 10
+			*(arr1 + i*matrixSize + j) = rand() % 10;	
 			*(arr2 + i*matrixSize + j) = rand() % 10;
 		}
 	}
 	
 
-	//Pretty-prints a matrix to the screen
-	printf("----------Matrix A---------------\n");
+	// Multiplies the two matrices together via dot-product
+	printf("Multiplying matrices...\n");
+
 	for(int i = 0; i < matrixSize; i++)
 	{
-		for(int j = 0; j< matrixSize; j++)
-		{
-			int val = *(arr1 + i*matrixSize + j);	//Finds next entry based on current ptr posn
-			printf("[%i] ",val);
-		}
-		printf("\n");
-	}
-
-	printf("----------Matrix B---------------\n");
-	for(int i = 0; i < matrixSize; i++)
-	{
-		for(int j = 0; j< matrixSize; j++)
-		{
-			int val = *(arr2 + i*matrixSize + j);	//Finds next entry based on current ptr posn
-			printf("[%i] ",val);
-		}
-		printf("\n");
-	}
-
-
-	//Multiplies the two matrices together via dot-product
-	printf("-----------------------------\nMultiplying matrices...\n");
-	for(int i = 0; i < matrixSize; i++)
-	{
-		for(int j = 0; j< matrixSize; j++)
+		for(int j = 0; j < matrixSize; j++)
 		{
 			int total = 0;
 
 			//Calculates the dot product for each entry of the new matrix
-			for(int k = 0; k < matrixSize;k++)
+			for(int k = 0; k < matrixSize; k++)
 			{
-				int dotProduct = *(arr1 + i*matrixSize+k) * *(arr2 + k*matrixSize+j);
+				//Finds next entry based on current ptr posn and matrix size
+				int dotProduct = *(arr1 + i * matrixSize + k) * *(arr2 + k * matrixSize + j);
 				total += dotProduct;
 			}
 
-			*(arr3 + i * matrixSize + j) = total;	//Assigns calculated dot-product to matrix entry
+			//Assigns calculated dot-product to matrix entry
+			*(arr3 + i * matrixSize + j) = total;	
 		}
-		printf("\n");
 	}
+	printf("All done multiplication.\n");
 
-
-	// Pretty-Print Resultant matrix
-	printf("----------Matrix AB--------------\n");
+	// Pipes all matrices to output file
+	FILE *output = fopen("result.txt","w");
+	fprintf(output,"----------Matrix A---------------\n");
 	for(int i = 0; i < matrixSize; i++)
 	{
-		for(int j = 0; j< matrixSize; j++)
+		for(int j = 0; j < matrixSize; j++)
 		{
-			int val = *(arr3 + i*matrixSize + j);	//Finds next entry based on current ptr posn
-			printf("[%i] ",val);
+			int val = *(arr1 + i * matrixSize + j);	
+			fprintf(output,"[%i] ",val);
 		}
-		printf("\n");
+		fprintf(output,"\n");
 	}
-	printf("-------------------------\n");
-
+	fprintf(output,"\n");
 	free(arr1);
+
+	fprintf(output,"----------Matrix B---------------\n");
+	for(int i = 0; i < matrixSize; i++)
+	{
+		for(int j = 0; j < matrixSize; j++)
+		{
+			int val = *(arr2 + i * matrixSize + j);
+			fprintf(output,"[%i] ",val);
+		}
+		fprintf(output,"\n");
+	}
+	fprintf(output,"\n");
 	free(arr2);
+
+	fprintf(output,"----------Matrix AB--------------\n");
+	for(int i = 0; i < matrixSize; i++)
+	{
+		for(int j = 0; j < matrixSize; j++)
+		{
+			int val = *(arr3 + i * matrixSize + j);
+			fprintf(output,"[%i]",val);
+		}
+		fprintf(output,"\n");
+	}
+	fprintf(output,"---------------------------------\n");
 	free(arr3);
-	printf("Memory de-allocated.\n");
 
-	// TODO- Pipe original matrixes to file then the result
-
+	fclose(output);
+	printf("Results saved in file \"result.txt\".\n");
 }
 
 int main()
 {
 	int n;
-	printf("Please input a number\n");
+	printf("Please the desired matrix size (N).\n");
 	scanf("%i", &n);				
 
 	matrixMult(n);
-
-	printf("All done!\n");
 }
