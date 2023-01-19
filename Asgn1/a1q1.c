@@ -2,20 +2,28 @@
 #include <stdlib.h>
 #include <time.h>
 
-// ****************************************************************************
-//		Author: 	Jordan Alexander Richard
-//		SN: 		3606213
-//
-//		Name: 		a1q1.c 	
-//		Purpose: 
-//
-//		This program randomly generates two NxN matrices based on a size 
-//		specified by the user. Multiplies these matrices together and stores
-//		resultant matrix to a file.
-//
-// ****************************************************************************
+/******************************************************************************
+ * 	
+ * Driver program to execute matrix multiplication method for question 1.
+ *
+ *  
+ * @author	Jordan Alexander Richard
+ * @version CS 3123 - Assignment 1 Question 1
+******************************************************************************/
 
 
+/******************************************************************************
+ *  Method: matrixMult: Given a square matrix order N, this method randomly 
+ * 			generates two NxN matrices based on a size specified by the user. 
+ * 			Multiplies these matrices together and stores resultant matrix to 
+ * 			a file.
+ * 
+ * 
+ *  Input:	int matrixSize - the size of nxn matrices to be created.
+ * 
+ *  Output: Nil
+ * 
+ * ****************************************************************************/
 void matrixMult(int matrixSize)
 {
 	printf("Creating the matrices...\n");

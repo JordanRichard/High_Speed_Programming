@@ -1,17 +1,26 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-// ****************************************************************************
-//		Author: 	Jordan Alexander Richard
-//		SN: 		3606213
-//
-//		Name: 		a1q2.c 	
-//		Purpose: 
-//
-//		Takes an input matrix from a provided file.
-//
-// ****************************************************************************
+/******************************************************************************
+ * 	
+ * Driver program to execute method for question 2.
+ *
+ *  
+ * @author	Jordan Alexander Richard
+ * @version CS 3123 - Assignment 1 Question 2
+******************************************************************************/
 
+
+/******************************************************************************
+ *  Method: sumSquares: 
+ * 
+ * 
+ *  Input:	
+ * 
+ *  Output: 
+ * 
+ * ****************************************************************************/
 void sumSquares()
 {
 	FILE *infile = fopen("data3.txt","r");
