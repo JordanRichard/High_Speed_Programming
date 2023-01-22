@@ -13,13 +13,14 @@
 
 
 /******************************************************************************
- *  Method: calcStats: 
+ *  Method: calcStats: Given an input file and number of data points, 
+ * 			calculates the mean and standard deviation of a dataset.
  * 
  * 
  *  Input:	FILE *input - 	File containing our data set.
  * 			int N - 		Number of data points to be processed.
  *  
- * Output:	Nil 
+ * 	Output:	Nil 
  * 
  * ****************************************************************************/
 void calcStats(FILE* input, int N)
