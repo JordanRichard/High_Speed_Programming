@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <math.h>
 
 /******************************************************************************
  * 	
- * Driver program to execute method for question 2.
+ * Driver program to execute function for question 2.
  *
  *  
  * @author	Jordan Alexander Richard
@@ -13,39 +13,48 @@
 
 
 /******************************************************************************
- *  Method: findMean: 
+ *  Method: calcStats: 
  * 
  * 
  *  Input:	FILE *input - 	File containing our data set.
- * 			int N - 		Size of the data set to be processed.
+ * 			int N - 		Number of data points to be processed.
  *  
- * Output:	double mk - 	Calculated mean of our data set. 
+ * Output:	Nil 
  * 
  * ****************************************************************************/
-double mean(FILE* input,int N)
+void calcStats(FILE* input, int N)
 {
 	double mk = 0;
 	double xk = 0;
+	double sk = 0;
 
 	for (int k = 1; k <= N; k++)
 	{
-
 		if(k == 1)
 		{
-			fscanf(input,"%lf",&mk);	//M1 
-			printf("M1: %lf\n",mk);
+			// Establishes initial values for std. dev. and mean
+			fscanf(input,"%lf",&mk); 
+			sk = 0;			
 		}	
 		else
 		{
-			fscanf(input,"%lf", &xk); // Reads value at posn k
-			printf("On value %lf\n",xk);
+			// Reads value at current position
+			fscanf(input,"%lf", &xk); 
 
-			mk = mk + ((xk - mk) / k);	
-			printf("Mk: %lf\n",mk);
+			// Save previous Mk before it is updated
+			double lastMk = mk; 
+
+			// Calculating std. dev. and mean for current iteration
+			mk = mk + ((xk - mk) / k);
+			sk = sk + (xk - lastMk)*(xk - mk);	
 		}
 	}
 
-	return mk;
+	// Finish calculating std. dev
+	double dev = sqrt(sk / (N - 1));
+
+	printf("Calculated Mean: %lf\n",mk);
+	printf("Calculated Std.Dev: %lf\n",dev);
 }
 
 
@@ -53,12 +62,11 @@ void main ()
 {
 	FILE *infile = fopen("data3.txt","r");
 
+	// Finds the number of elements
 	int elems;
-	fscanf(infile,"%i", &elems);	//Finds the number of elements
+	fscanf(infile,"%i", &elems);	
 
-	double r = mean(infile,elems);
-
-	printf("Calculated Mean: %f\n",r);
+	calcStats(infile, elems * elems);
 
 	fclose(infile);
 }
