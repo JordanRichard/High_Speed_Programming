@@ -36,13 +36,14 @@ int main(int a, char **b)
 		thread_id = omp_get_thread_num();
 		m = omp_get_num_threads();
 
-		//printf("Hello World! From thread %i of %i\n",thread_id,m);	
-	
+		printf("Hello World! From thread %i of %i\n",thread_id,m);	
+		/*
 		for(int i = 0; i <= 100000; i++)
 		{
 			if(vector[i] == 2)
 				twoCount++; 
 		}
+		*/
 	}
 	
 	after = clock();
