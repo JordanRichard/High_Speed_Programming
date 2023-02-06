@@ -80,5 +80,5 @@
 
 int main()
 {
-	randomIntFrequency(500);
+	randomIntFrequency(10000);
 }

@@ -80,5 +80,5 @@ void matrixAddition(int N)
 
 int main()
 {
-    matrixAddition(500);
+    matrixAddition(10000);
 }

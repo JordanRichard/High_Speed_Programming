@@ -1,0 +1,15 @@
+/var/spool/slurmd/job58699240/slurm_script: line 9: 11212 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:  1104 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:  2342 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:  7238 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:  8561 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9: 21580 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9: 23382 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:   713 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:   981 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:  1249 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:  1321 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:  1745 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:  1785 Killed                  ./a.out
+/var/spool/slurmd/job58699240/slurm_script: line 9:  2111 Killed                  ./a.out
+slurmstepd: error: Detected 14 oom-kill event(s) in StepId=58699240.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.
