@@ -29,7 +29,7 @@
  	int timeDifference;
 
  	int m;
-	int thread_id;
+	int p;
 
 	int randomIntegers[N];
 	int frequencyTable[10];
@@ -38,14 +38,14 @@
 
 
 	// Generates random integers and calulates frequencies in parallel
-	#pragma omp parallel private(thread_id)
+	#pragma omp parallel private(p)
 	{
-		thread_id = omp_get_thread_num();
+		p = omp_get_thread_num();
 		m = omp_get_num_threads();
 	
 		// Calculates start and endpoints of each thread
-		int start = (thread_id * (N / m));
-		int end = ((thread_id + 1) * (N / m) -1);
+		int start = (p * (N / m));
+		int end = ((p + 1) * (N / m) -1);
 
 		//Generates randomized value between 1-10 and adds to array
 		for(int i = start; i <= end; i++)
