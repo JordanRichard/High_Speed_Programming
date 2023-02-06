@@ -5,28 +5,27 @@
 
 /******************************************************************************
  * 	
- * Driver program to generate random integer array in parallel for question 1.
+ * Driver program to calculate a summation in parallel for question 2.
  *
  *  
  * @author	Jordan Alexander Richard
- * @version CS 3123 - Assignment 2 Question 1
+ * @version CS 3123 - Assignment 2 Question 2
 ******************************************************************************/
 
 /******************************************************************************
- *  Method: randomIntFrequency: Given a value N, this function randomly 
- * 			generates N values from 1-10, then counts the frequency of each 
- * 			value in parallel.
+ *  Method: summation: Given a value N, generates random input xi and
+ * 			calculates a summation in parallel.
  * 
- *  Input:	N - The number of random integers to be generated.
+ *  Input:	N - The number of values to be processed.
  * 
  *  Output: Nil
  * 
  * ****************************************************************************/
  void randomIntFrequency(int N)
  {
- 	int before = clock();
- 	int after;
- 	int timeDifference;
+ 	double before = clock();
+ 	double after;
+ 	double timeDifference;
 
  	int m;
 	int p;
@@ -74,9 +73,9 @@
 
 	// Calculates and displays elapsed time
 	after = clock();
-	timeDifference = after- before;
+	timeDifference = (after - before) / CLOCKS_PER_SEC;
 
-	printf("Processed %i Values in %i (ms).\n",N,timeDifference);
+	printf("Processed %i Values in %lf (s).\n",N,timeDifference);
  }
 
 int main()

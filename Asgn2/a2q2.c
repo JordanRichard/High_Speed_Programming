@@ -23,9 +23,9 @@
  * ****************************************************************************/
 void summation(int N)
 {
-    int before = clock();
-    int after;
-    int timeDifference;
+    double before = clock();
+    double after;
+    double timeDifference;
 
     int m;
     int p;
@@ -78,8 +78,8 @@ void summation(int N)
     printf("Total: %f\n",total);
 
     after = clock();
-    timeDifference = after - before;
-    printf("Processed %i Values in %i (ms)\n",N,timeDifference);
+    timeDifference = (after - before) / CLOCKS_PER_SEC;
+    printf("Processed %i Values in %lf (s)\n",N,timeDifference);
 }
 
 int main()
