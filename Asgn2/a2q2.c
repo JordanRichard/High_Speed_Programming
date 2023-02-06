@@ -62,7 +62,7 @@ void summation(int N)
         }
 
         //Calculates summation for this thread's values
-        for(int j = start; j<= end; j++)
+        for(int j = start; j <= end; j++)
         {
             xi = input[j];
             currentSum += (xi / (xi + 1)) * (pow(-1, j));
@@ -71,7 +71,7 @@ void summation(int N)
     }
 
     // Combines results and displays summation total
-    for(int w = 0; w< m;w++)
+    for(int w = 0; w < m; w++)
     {
         total += results[w];
     }

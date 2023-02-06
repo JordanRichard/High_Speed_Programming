@@ -64,10 +64,10 @@
 
 	// Serially builds and prints the frequency table 
 	printf("Value:\tFrequency:\tRelative:\n");
-	for(int i=0; i < 10; i++)
+	for(int i = 0; i < 10; i++)
 	{
 		float relativeFrequency = (float)frequencyTable[i] / (float)N;
-		printf("[%i] \t%i \t\t%.4f\n", i+1,frequencyTable[i],relativeFrequency);
+		printf("[%i] \t%i \t\t%.4f\n", i + 1,frequencyTable[i],relativeFrequency);
 	}
 
 
