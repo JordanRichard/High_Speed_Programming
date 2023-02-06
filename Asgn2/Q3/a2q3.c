@@ -13,10 +13,10 @@
 ******************************************************************************/
 
 /******************************************************************************
- *  Method: summation: Given a value N, generates two NxN matrices of randomly
+ *  Method: matrixAddition: Given a value N, generates two NxN matrices of randomly
  *          generated double values and adds them together in parallel.
  * 
- *  Input:	N - The size (order) of matrices to be created.
+ *  Input:  N - The size (order) of matrices to be created.
  * 
  *  Output: Nil
  * 

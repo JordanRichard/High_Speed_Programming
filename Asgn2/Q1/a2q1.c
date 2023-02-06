@@ -5,18 +5,19 @@
 
 /******************************************************************************
  * 	
- * Driver program to calculate a summation in parallel for question 2.
+ * Driver program to create a random integer array and frequency table for 
+ * question 1.
  *
  *  
  * @author	Jordan Alexander Richard
- * @version CS 3123 - Assignment 2 Question 2
+ * @version CS 3123 - Assignment 2 Question 1
 ******************************************************************************/
 
 /******************************************************************************
- *  Method: summation: Given a value N, generates random input xi and
- * 			calculates a summation in parallel.
+ *  Method: randomIntFrequency: Given a value N, generates an array of N random 
+ *          integers in parallel and creates a frequency table.
  * 
- *  Input:	N - The number of values to be processed.
+ *  Input:  N - The number of values to be processed.
  * 
  *  Output: Nil
  * 

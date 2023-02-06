@@ -6,7 +6,7 @@
 
 /******************************************************************************
  * 	
- * Driver program to 
+ * Driver program to calculate a cummation for question 2.
  *
  *  
  * @author	Jordan Alexander Richard
@@ -14,9 +14,9 @@
 ******************************************************************************/
 
 /******************************************************************************
- *  Method: 
+ *  Method: summation: Given a value N, calculates a summation in parallel.
  * 
- *  Input:	N - Upper limit of the summation to be calculated.
+ *  Input:  N - Upper limit of the summation to be calculated.
  * 
  *  Output: Nil
  * 
