@@ -28,21 +28,18 @@
  {
  	int a,b,c;
  	float percentage;
- 	//int p,m;
 	
 	srand(time(NULL));
 
+	double diff;
 
-	//reduction(max: diff) private(start,end,diff)
-
-
-
-	double start = omp_get_wtime();
-	#pragma omp parallel private(a,b,c,percentage)
+	#pragma omp parallel private(a,b,c,percentage) reduction(max: diff)
 	{
 		int iterations = 0;
 
-		#pragma omp for
+		double start = omp_get_wtime();
+
+		#pragma omp for schedule(dynamic)
 			for(int i = 0; i < N; i++)
 			{
 				a = rand();
@@ -51,12 +48,16 @@
 				iterations ++;
 			}
 		int p = omp_get_thread_num();
-
+		
 		percentage = 100*(iterations / (float)N);
+
+		double end = omp_get_wtime();
+		diff = end - start;
+		
+
 		printf("Thread %i ran %i times. (%.2f%%)\n",p,iterations,percentage);
 	}
-	double end = omp_get_wtime();
-	double diff = end - start;
+
 	printf("%f\n",diff);
 }
 
