@@ -36,6 +36,7 @@
 	#pragma omp parallel reduction(max: timeDifference)
 	{
 		double before = clock();
+		
 		// Generates random integers and calulates frequencies in parallel
 		#pragma omp for
 			for(int i = 0; i < N; i++)
