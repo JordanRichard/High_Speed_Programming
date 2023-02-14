@@ -63,7 +63,7 @@ void matrixAddition(int N)
     printf("Added two %iX%i matrices in %lf (s).\n",N,N,timeDifference);
 
     //Print resultant matrix for verification
-
+    /*
     printf("----------Result-------------\n");
     for(int i = 0; i < N; i++)
     {
@@ -73,6 +73,7 @@ void matrixAddition(int N)
         }
         printf("\n");
     }
+    */
 
 }
 
