@@ -39,7 +39,7 @@
 
 		double start = omp_get_wtime();
 
-		#pragma omp for schedule(dynamic)
+		#pragma omp for schedule(guided)
 			for(int i = 0; i < N; i++)
 			{
 				a = rand();

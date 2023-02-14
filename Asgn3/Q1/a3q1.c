@@ -25,37 +25,40 @@
  * ****************************************************************************/
  void randomIntFrequency(int N)
  {
- 	double before = clock();
- 	double after;
  	double timeDifference;
+
 
 	int randomIntegers[N];
 	int frequencyTable[10];
 
 	srand(time(NULL));
 
-	// Generates random integers and calulates frequencies in parallel
-	#pragma omp parallel for
-		for(int i = 0; i < N; i++)
-		{
-			int r = (rand() % (10-1 +1)) + 1;
-			randomIntegers[i] = r;
-		}
-
-	// Creates frequency table of each value generated
-	#pragma omp parallel for
-		for(int j = 0; j < N; j++)
-		{
-			int value = randomIntegers[j];
-			#pragma omp critical
+	#pragma omp parallel reduction(max: timeDifference)
+	{
+		double before = clock();
+		// Generates random integers and calulates frequencies in parallel
+		#pragma omp for
+			for(int i = 0; i < N; i++)
 			{
-				frequencyTable[value -1] = frequencyTable[value -1] + 1;
+				int r = (rand() % (10-1 +1)) + 1;
+				randomIntegers[i] = r;
 			}
-		}
 
-	// Calculates and displays elapsed time
-	after = clock();
-	timeDifference = (after - before) / CLOCKS_PER_SEC;
+		// Creates frequency table of each value generated
+		#pragma omp for
+			for(int j = 0; j < N; j++)
+			{
+				int value = randomIntegers[j];
+				#pragma omp critical
+				{
+					frequencyTable[value -1] = frequencyTable[value -1] + 1;
+				}
+			}
+
+		// Calculates and displays elapsed time
+		double after = clock();
+		timeDifference = (after - before) / CLOCKS_PER_SEC;
+	}
 
 	// Serially prints the frequency table 
 	printf("Value:\tFrequency:\tRelative:\n");
