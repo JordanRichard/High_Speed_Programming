@@ -27,7 +27,6 @@
  {
  	double timeDifference;
 
-
 	int randomIntegers[N];
 	int frequencyTable[10];
 
@@ -36,13 +35,13 @@
 	#pragma omp parallel reduction(max: timeDifference)
 	{
 		double before = clock();
-		
+		srand(time(NULL));
+
 		// Generates random integers and calulates frequencies in parallel
 		#pragma omp for
 			for(int i = 0; i < N; i++)
 			{
-				int r = (rand() % (10-1 +1)) + 1;
-				randomIntegers[i] = r;
+				randomIntegers[i] = (rand() % (10-1 +1)) + 1;
 			}
 
 		// Creates frequency table of each value generated
@@ -61,15 +60,17 @@
 		timeDifference = (after - before) / CLOCKS_PER_SEC;
 	}
 
+	/*
 	// Serially prints the frequency table 
 	printf("Value:\tFrequency:\tRelative:\n");
 	for(int i = 0; i < 10; i++)
 	{
-		float relativeFrequency = (float)frequencyTable[i] / (float)N; //Parallelize?
+		float relativeFrequency = (float)frequencyTable[i] / (float)N;
 		printf("[%i] \t%i \t\t%.4f\n", i + 1,frequencyTable[i],relativeFrequency);
 	}
+	*/
 
-	printf("Processed %i Values in %lf (s).\n",N,timeDifference);
+	printf("%lf\n",timeDifference);
  }
 
 int main()

@@ -32,17 +32,16 @@ void summation(int N)
     int input[N];
     
     srand(time(NULL));
+
     #pragma omp parallel reduction(max: timeDifference)
     {
         double before = clock();
-        double after = 0;
 
         //Generates randomized input from 1-10 for Xi
         #pragma omp for
             for(int i = 0; i <= N; i++)
             {
-                int r = (rand() % (10-1 +1)) + 1;
-                input[i] = r;
+                input[i] = (rand() % (10-1 +1)) + 1;
             }
 
         //Calculates summation for this thread's values
@@ -53,11 +52,12 @@ void summation(int N)
                 totalSum += (xi / (xi + 1)) * (pow(-1, j));
             }
 
-        after = clock();
+        double after = clock();
         timeDifference = (after - before) / CLOCKS_PER_SEC;
     }
-    printf("Total: %f\n",totalSum);
-    printf("Processed %i Values in %lf (s)\n",N,timeDifference);
+    // Displays elapsed time
+    //printf("Total: %f\n",totalSum);
+    printf("%lf\n",timeDifference);
 }
 
 int main()
