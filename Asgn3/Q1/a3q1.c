@@ -37,7 +37,7 @@
 		double before = clock();
 		srand(time(NULL));
 
-		// Generates random integers and calulates frequencies in parallel
+		// Generates random integers and adds to array
 		#pragma omp for
 			for(int i = 0; i < N; i++)
 			{
@@ -55,24 +55,33 @@
 				}
 			}
 
-		// Calculates and displays elapsed time
+		// Calculates elapsed time
 		double after = clock();
 		timeDifference = (after - before) / CLOCKS_PER_SEC;
 	}
 
 	/*
-	// Serially prints the frequency table 
+	// Serially prints the frequency table if desired
 	printf("Value:\tFrequency:\tRelative:\n");
 	for(int i = 0; i < 10; i++)
 	{
 		float relativeFrequency = (float)frequencyTable[i] / (float)N;
-		printf("[%i] \t%i \t\t%.4f\n", i + 1,frequencyTable[i],relativeFrequency);
+		printf("[%i] \t%i \t\t%.4f\n", i+1,frequencyTable[i],relativeFrequency);
 	}
 	*/
 
 	printf("%lf\n",timeDifference);
  }
 
+/******************************************************************************
+ *  Method: main: Calls the method required providing an argument N, the number
+ *			of elements to process.
+ * 
+ *  Input:  Nil
+ * 
+ *  Output: Nil
+ * 
+ * ****************************************************************************/
 int main()
 {
 	randomIntFrequency(10000);

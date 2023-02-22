@@ -55,11 +55,22 @@ void summation(int N)
         double after = clock();
         timeDifference = (after - before) / CLOCKS_PER_SEC;
     }
-    // Displays elapsed time
+
+    // Displays elapsed time if needed
     //printf("Total: %f\n",totalSum);
     printf("%lf\n",timeDifference);
 }
 
+
+/******************************************************************************
+ *  Method: main: Calls the method required providing an argument N, the number
+ *			of elements to process.
+ * 
+ *  Input:  Nil
+ * 
+ *  Output: Nil
+ * 
+ * ****************************************************************************/
 int main()
 {
     summation(10000);
