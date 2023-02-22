@@ -68,6 +68,15 @@ void matrixAddition(int N)
 }
 
 
+/******************************************************************************
+ *  Method: main: Calls the method required providing an argument N, the order
+ *			of matrix elements to process.
+ * 
+ *  Input:  Nil
+ * 
+ *  Output: Nil
+ * 
+ * ****************************************************************************/
 int main()
 {
     matrixAddition(10000);
