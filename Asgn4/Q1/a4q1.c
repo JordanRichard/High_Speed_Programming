@@ -35,11 +35,14 @@ void randomIntFrequency(int N)
 	int start = (p * (N / m));
 	int end = ((p + 1) * (N / m) -1);
 
+    printf("P%d S:%d E:%d\n",p,start,end);
+
     //Generates randomized value between 1-10 and adds to array
 	for(int i = start; i <= end; i++)
 	{
 		int r = (rand() % (10-1 +1)) + 1;
 		randomIntegers[i] = r;
+        printf("Process %d making value %d and placing in randarray index %d\n",p,r,i);
 	}
 
     // Creates frequency table of each value generated
@@ -47,22 +50,16 @@ void randomIntFrequency(int N)
 	{
 		int value = randomIntegers[j];
 		frequencyTable[value -1] = frequencyTable[value -1] + 1;
+        printf("P%d got value %d and put in box %d\n",p,value,value-1);
 	}
 
-    /*
-    if(p == 7)
-    {
-        printf("HI IM LUCKY #%d\n",p);
-    }
-    else
-    {
-        printf("Hello from process %d of %d\n",p,m);
-    }
-    */
-    MPI_Finalize();
-    /*  Close the parallel machine  */
+
     if(p == 0)
     {
+        //Wipe frequency table
+        for(int i = 0; i < 10; i++)
+            frequencyTable[i] = 0;
+
         printf("Value:\tFrequency:\tRelative:\n");
         for(int i = 0; i < 10; i++)
         {
@@ -70,6 +67,10 @@ void randomIntFrequency(int N)
             printf("[%i] \t%i \t\t%.4f\n", i + 1,frequencyTable[i],relativeFrequency);
         }
     }
+
+    MPI_Finalize();
+    /*  Close the parallel machine  */
+
 }
 
 
@@ -84,5 +85,5 @@ void randomIntFrequency(int N)
  * ****************************************************************************/
 int main()
 {
-    randomIntFrequency(10);
+    randomIntFrequency(20);
 }
