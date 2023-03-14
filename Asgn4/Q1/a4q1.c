@@ -26,10 +26,9 @@
 void randomIntFrequency(int N)
 {
     int randomIntegers[N];
-    int p,m;
-
-    int globalSum[10];
+    int frequencyTable[10];
     int localSum[10];
+    int p,m;
 
     //  Initialize MPI
     MPI_Init(NULL,NULL);
@@ -45,7 +44,7 @@ void randomIntFrequency(int N)
 
         //Initializes blank frequency table
         for(int i = 0; i < 10; i++)
-            globalSum[i] = 0;
+            frequencyTable[i] = 0;
 
         //Generates randomized value between 1-10 and adds to array
         for(int i = 0; i < N; i++)
@@ -57,7 +56,6 @@ void randomIntFrequency(int N)
     }
     // Share input array with worker nodes
     MPI_Bcast(&randomIntegers,N,MPI_INT,ROOT,MPI_COMM_WORLD);
-
 
 	// Calculates start and endpoints of each process's subarray
 	int start = (p * (N / m));
@@ -90,7 +88,7 @@ void randomIntFrequency(int N)
         //Reduce all found value tallys to frequency table
         localSum[i] = tally;
         MPI_Barrier(comm);
-        MPI_Reduce(&localSum[i],&globalSum[i],1,MPI_INT,MPI_SUM,ROOT,comm);
+        MPI_Reduce(&localSum[i],&frequencyTable[i],1,MPI_INT,MPI_SUM,ROOT,comm);
     }
     MPI_Barrier(comm);
 
@@ -100,8 +98,8 @@ void randomIntFrequency(int N)
         printf("Value:\tFrequency:\tRelative:\n");
         for(int i = 0; i < 10; i++)
         {
-            float relativeFrequency = (float)globalSum[i] / (float)N;
-            printf("[%i] \t%i \t\t%.4f\n", i + 1,globalSum[i],relativeFrequency);
+            float relativeFrequency = (float)frequencyTable[i] / (float)N;
+            printf("[%i] \t%i \t\t%.4f\n", i + 1,frequencyTable[i],relativeFrequency);
         }
     }
     
