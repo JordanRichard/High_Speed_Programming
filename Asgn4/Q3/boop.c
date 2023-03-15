@@ -8,12 +8,14 @@
 void gen(int N)
 {
     int p, m;
-    double **matrix1, **matrix2, **matrix3, *localRow1, *localRow2;
+    double **matrix1, **matrix2, **matrix3, *localRow1, *localRow2, *localRow3;
     int sliceSize, i, j;
 
     MPI_Init(NULL,NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &p);
     MPI_Comm_size(MPI_COMM_WORLD, &m);
+
+    /*  PERFORM MEMORY ALLOCATION       */
 
     // allocate memory for contiguous 2D array
     matrix1 = (double **) malloc(N * sizeof(double *));
@@ -36,9 +38,12 @@ void gen(int N)
     sliceSize = N / m;
     localRow1 = (double *) malloc(sliceSize * N * sizeof(double));
     localRow2 = (double *) malloc(sliceSize * N * sizeof(double));
+    localRow3 = (double *) malloc(sliceSize * N * sizeof(double));
     MPI_Scatter(matrix1[0], sliceSize * N, MPI_DOUBLE,localRow1, sliceSize * N, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
     MPI_Scatter(matrix2[0], sliceSize * N, MPI_DOUBLE,localRow2, sliceSize * N, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
-    
+
+    /*  PERFORM ARRAY INITIALIZATION    */
+
     // Initialize local array slice(s) with random double values
     srand(time(NULL) + p);
     // For all slices for this process
@@ -51,25 +56,20 @@ void gen(int N)
             localRow2[i * N + j] = (double)(rand() % 10);
         }
     }
-
     // Gather all initialized slices into root (input) matrices
     MPI_Gather(localRow1, sliceSize * N, MPI_DOUBLE,matrix1[0], sliceSize * N, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
     MPI_Gather(localRow2, sliceSize * N, MPI_DOUBLE,matrix2[0], sliceSize * N, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
-
-
-    // For all slices for this process
-    for (i = 0; i < sliceSize; i++) 
+    
+    /*  PERFORM MATRIX ADDITION         */
+    
+    // Store sum of local slices in Result slice
+    for (i = 0; i < sliceSize * N; i++) 
     {
-        // For each index in slice
-        for (j = 0; j < N; j++) 
-        {
-            matrix3[i][j] = matrix1[i][j] + matrix2[i][j];
-        }
+        localRow3[i] = localRow1[i] + localRow2[i];
     }
 
-    MPI_Gather(matrix3[0], sliceSize * N, MPI_DOUBLE, matrix3[0], sliceSize * N, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
-
-
+    // Gather all initialized slices into root matrix
+    MPI_Gather(localRow3, sliceSize * N, MPI_DOUBLE,matrix3[0], sliceSize * N, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
 
     // Gets root node to display the matrix created
     if (p == 0) 
@@ -116,6 +116,7 @@ void gen(int N)
     free(matrix2[0]);
     free(matrix2);
 
+    free(localRow3);
     free(matrix3[0]);
     free(matrix3);
 
@@ -123,5 +124,5 @@ void gen(int N)
 }
 
 int main() {
-    gen(8);
+    gen(100);
 }
