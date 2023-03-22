@@ -26,59 +26,54 @@
  * ****************************************************************************/
  void summation(int N)
  {
-    //double timeDifference;
     double xi = 0;
     double localSum = 0;
     double totalSum = 0;
-    int p,m;
+    int p,m,i,j;
 
     int input[N];
 
-    //  Setup MPI
     MPI_Init(NULL,NULL);
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Comm_rank(comm, &p);
     MPI_Comm_size(comm, &m);
 
-    //  Get root node to generate input values
+    // Get root node to generate input values
     if(p == ROOT)
     {
         srand(time(NULL)); 
 
-        for(int i = 0; i < N; i++)
+        for(i = 0; i < N; i++)
         {
-            input[i] = (rand() % (10-1 +1)) + 1;
-            printf("[%d]",input[i]);
+            input[i] = (rand() % 10) + 1;
+            
         }
-        printf("\n");
     }
 
     // Send input array to worker nodes
     MPI_Bcast(&input,N,MPI_INT,ROOT,MPI_COMM_WORLD);
 
-
-    //  Get worker nodes to make their own summations
+    // Have each node calculute their portion of array to work on
     int start = (p * (N / m));
 	int end = ((p + 1) * (N / m) -1);
 
-    //  Calculate summation
-    printf("P%d:",p);
-    for(int j = start; j <= end; j++)
+    //  Calculate summation on local subarray
+    for(j = start; j <= end; j++)
     {
         xi = input[j];
         localSum += (xi / (xi + 1)) * (pow(-1, j));
-        printf("[%d]",input[j]);
     }
-    printf("Localsum on P%d:%f\n",p,localSum);
-
-    //  Combine results and send to root
+    
+    //  Combine local results and send to root
     MPI_Reduce(&localSum,&totalSum,1,MPI_DOUBLE,MPI_SUM,ROOT,comm);
     
     //  Show result from root
+    /*
     if(p == ROOT)
     {
         printf("Total: %f\n",totalSum);
     }
+    */
 
     MPI_Finalize();
  }
