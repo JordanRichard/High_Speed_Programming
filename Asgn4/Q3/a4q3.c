@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <mpi.h>
 #include <time.h>
 
@@ -27,96 +27,120 @@
  * ****************************************************************************/
 void matrixAddition(int N)
 {
-    //double timeDifference;
+    int p, m;
+    double **matrix1, **matrix2, **matrix3, *localRow1, *localRow2, *localRow3;
+    int sliceSize, i, j;
 
-    double arr1[N][N];
-    //double arr2[N][N];
-    //double arr3[N][N];
-    
-    double tempRow[N];
-    double otherTemp[N];
-    int p,m;
-
-    
-
-    //  Setup MPI
     MPI_Init(NULL,NULL);
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Comm_rank(comm, &p);
     MPI_Comm_size(comm, &m);
 
-    MPI_Status status;
+    // Allocate memory for pointers to array columns of size N
+    matrix1 = (double **) malloc(N * sizeof(double *));
+    matrix2 = (double **) malloc(N * sizeof(double *));
+    matrix3 = (double **) malloc(N * sizeof(double *));
 
-    // Calculates start and endpoints of each process
-    int start = (p * (N / m));
-    int end = ((p + 1) * (N / m) -1);
-    MPI_Barrier(comm);
+    // Allocate memory for NxN 2d aarray
+    matrix1[0] = (double *) malloc(N * N * sizeof(double));
+    matrix2[0] = (double *) malloc(N * N * sizeof(double));
+    matrix3[0] = (double *) malloc(N * N * sizeof(double));
 
+    // Assigns offset for each row's starting addresses using pointer arithmetic
+    for (i = 1; i < N; i++) 
+    {
+        matrix1[i] = matrix1[0] + i * N;
+        matrix2[i] = matrix2[0] + i * N;
+        matrix3[i] = matrix3[0] + i * N;
+    }
+
+    // Allocate slices of matrix locally and distribute among processes
+    sliceSize = N / m;
+    localRow1 = (double *) malloc(sliceSize * N * sizeof(double));
+    localRow2 = (double *) malloc(sliceSize * N * sizeof(double));
+    localRow3 = (double *) malloc(sliceSize * N * sizeof(double));
+    MPI_Scatter(matrix1[0], sliceSize * N, MPI_DOUBLE,localRow1, sliceSize * N, MPI_DOUBLE, ROOT, comm);
+    MPI_Scatter(matrix2[0], sliceSize * N, MPI_DOUBLE,localRow2, sliceSize * N, MPI_DOUBLE, ROOT, comm);
+
+    // Seed random number generator and offset by pid to ensure unique output
     srand(time(NULL) + p);
 
-    // for range of rows per process
-    for(int i = start; i <= end; i++)
-    {   
-        printf("P%d ",p);
-        //make input vectors  
-        for(int j = 0; j < N; j++)
+    // Have each process initialize its local array slice with random double values
+    for (i = 0; i < sliceSize; i++) 
+    {
+        for (j = 0; j < N; j++) 
         {
-            tempRow[j] = (double)(rand() % 10);
-            printf("%.1f ",tempRow[j]);
+            localRow1[i * N + j] = (double)(rand() % 10);
+            localRow2[i * N + j] = (double)(rand() % 10);
         }
-        MPI_Barrier(comm);
-
-        
-        MPI_Gather(&tempRow,N,MPI_DOUBLE,&(arr1[i]),N,MPI_DOUBLE,ROOT,comm);
-        
-        /*
-        MPI_Send(&tempRow, N, MPI_DOUBLE, ROOT, 1, comm);
-
-        if(p == ROOT)
-        {
-            MPI_Recv(arr1, N, MPI_DOUBLE, ROOT, MPI_ANY_TAG,comm,&status);
-           
-        }
-        */
-        
-        printf("\n");
-        //printf("p%d updated row %d\n",p,i);
-        
-
-        //Send the row of data we made to the root matrix somehow
-        
-        //printf("p%d iter%d sending to row %d\n",p,i);
-        MPI_Barrier(comm);
-        
-        
     }
-    printf("\n");
-    MPI_Barrier(comm);
 
+    // Gather all initialized slices into root (input) matrices
+    MPI_Gather(localRow1, sliceSize * N, MPI_DOUBLE,matrix1[0], sliceSize * N, MPI_DOUBLE, ROOT, comm);
+    MPI_Gather(localRow2, sliceSize * N, MPI_DOUBLE,matrix2[0], sliceSize * N, MPI_DOUBLE, ROOT, comm);
     
-    // Get root to print result matrix
-   if(p == ROOT)
-   {
-        //for(int x=0;x<N;x++)
-        //{
-        //    arr1[7][x] = 999;
-        //}
-        printf("Back on 0, printing arr...\n");
-        for(int i = 0; i < N; i++)
+    // Store sum of local slices in Result slice and gather into result matrix
+    for (i = 0; i < sliceSize * N; i++) 
+    {
+        localRow3[i] = localRow1[i] + localRow2[i];
+    }
+    MPI_Gather(localRow3, sliceSize * N, MPI_DOUBLE,matrix3[0], sliceSize * N, MPI_DOUBLE, ROOT, comm);
+
+
+    // Gets root node to display the matrix created
+    /*
+    if (p == ROOT) 
+    {
+        printf("Randomly generated %dx%d array1:\n", N, N);
+        for (i = 0; i < N; i++) 
         {
-
-            printf("Row%d:",i);
-            for(int j = 0; j < N; j++)
+            for (j = 0; j < N; j++) 
             {
-                printf("[%.0f]",arr1[i][j]);
+                printf("[%.0f] ", matrix1[i][j]);
             }
-            printf("\n");  
+            printf("\n");
         }
+        printf("\n");
 
-   }
-   
+        printf("Randomly generated %dx%d array2:\n", N, N);
+        for (i = 0; i < N; i++) 
+        {
+            for (j = 0; j < N; j++) 
+            {
+                printf("[%.0f] ", matrix2[i][j]);
+            }
+            printf("\n");
+        }
+        printf("\n");
 
+        printf("Result %dx%d array3:\n", N, N);
+        for (i = 0; i < N; i++) 
+        {
+            for (j = 0; j < N; j++) 
+            {
+                printf("[%.0f] ", matrix3[i][j]);
+            }
+            printf("\n");
+        }
+    }
+    */
+
+    // De-allocate memory reserved for matrices
+    free(localRow1);
+    free(matrix1[0]);
+    free(matrix1);
+
+    free(localRow2);
+    free(matrix2[0]);
+    free(matrix2);
+
+    free(localRow3);
+    free(matrix3[0]);
+    free(matrix3);
+
+    MPI_Finalize();
 }
+
 
  /******************************************************************************
  *  Method: main: Calls the method required providing an argument N, the order
@@ -127,7 +151,6 @@ void matrixAddition(int N)
  *  Output: Nil
  * 
  * ****************************************************************************/
-int main()
-{
+int main() {
     matrixAddition(8);
 }
