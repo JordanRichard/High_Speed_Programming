@@ -151,6 +151,7 @@ void matrixAddition(int N)
  *  Output: Nil
  * 
  * ****************************************************************************/
-int main() {
+int main() 
+{
     matrixAddition(8);
 }
