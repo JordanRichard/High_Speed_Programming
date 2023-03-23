@@ -31,6 +31,8 @@ void randomIntFrequency(int N)
     int localSum[10];
     int p,m,i,j,counter;
 
+    double startTime,endTime,globalStartTime,globalEndTime,timeDifference;
+
     MPI_Init(NULL,NULL);
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Comm_rank(comm, &p);
@@ -46,33 +48,31 @@ void randomIntFrequency(int N)
             frequencyTable[i] = 0;
         }
     }
-
-    //Seed RNG based on pid to ensure unique results
-    srand(time(NULL) + p);
     
-    // Generate local subarray of random integers
+    // Start timing each process
+    MPI_Barrier(comm);
+    startTime = MPI_Wtime();
+
+    // Generate local subarray of random integers,Seed RNG based on pid to ensure unique results 
+    srand(MPI_Wtime() + p);
     for(i = 0; i < N/m; i++)
     {
         localRandoms[i] = (rand() % 10) + 1;
     }
     
-    // Collect generated subarrays into root array
+    /*  
+        Collect generated subarrays into root array and re-broadcast the whole 
+        array to worker nodes. While this communication step is redundant 
+        (As frequency counts could just be calculated on the subarrays already 
+        in memory for each process) It would allow for later reuse of this 
+        entire array if desireable. 
+    */
     MPI_Gather(localRandoms, N/m, MPI_INT, randomIntegers, N/m, MPI_INT, ROOT, comm);
-    if(p == 0)
-    {
-        //Show gathered arr at root node
-        for(i = 0; i < N; i++)
-            printf("[%d]",randomIntegers[i]);
-        printf("\n");
-    }
-
-    // Share input array with worker nodes
     MPI_Bcast(&randomIntegers, N, MPI_INT, ROOT, MPI_COMM_WORLD);
     
-    // Calculates start and endpoints of each process's subarray
-	int start = (p * (N / m));
-	int end = ((p + 1) * (N / m) -1);
-
+    // Calculates start and endpoints for each process to work on
+	int startIndex = (p * (N / m));
+	int endIndex = ((p + 1) * (N / m) -1);
 
     // Loop through each value in freq table and tally value totals by process
     for(i = 0; i < 10; i++)
@@ -80,7 +80,7 @@ void randomIntFrequency(int N)
         counter = 0;
 
         // For each value in process subarray, increment value counter if match
-        for(j = start; j <= end; j++)
+        for(j = startIndex; j <= endIndex; j++)
         {
             if(randomIntegers[j] == i+1)
             {
@@ -88,20 +88,32 @@ void randomIntFrequency(int N)
             }
         }
 
-        // Reduce all found value counts to frequency table
+        // Reduce sum of all found value counts to frequency table
         localSum[i] = counter;
         MPI_Reduce(&localSum[i], &frequencyTable[i], 1, MPI_INT, MPI_SUM, ROOT, comm);
     }
+
+    endTime = MPI_Wtime();
+
+    // Calculate elapsed runtime over all processes
+    MPI_Reduce(&startTime, &globalStartTime, 1, MPI_DOUBLE, MPI_MIN, ROOT, comm);
+    MPI_Reduce(&endTime, &globalEndTime, 1, MPI_DOUBLE, MPI_MIN, ROOT, comm);
     
-    // Gets root node to display frequency table
+    // Gets root node to display Results
     if(p == ROOT)
     {
+        // Display calculation time
+        printf("Runtime %f(s).\n", (globalEndTime - globalStartTime));
+
+        // Display Frequency table
+        
         printf("Value:\tFrequency:\tRelative:\n");
         for(i = 0; i < 10; i++)
         {
             float relativeFrequency = (float)frequencyTable[i] / (float)N;
             printf("[%i] \t%i \t\t%.4f\n", i + 1, frequencyTable[i], relativeFrequency);
         }
+        
     }
     
     MPI_Finalize();
