@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <mpi.h>
-#include <time.h>
 
 #define ROOT 0
 
@@ -29,9 +28,8 @@ void randomIntFrequency(int N)
     int randomIntegers[N];
     int frequencyTable[10];
     int localSum[10];
-    int p,m,i,j,counter;
-
-    double startTime,endTime,globalStartTime,globalEndTime,timeDifference;
+    int p, m, i, j, counter;
+    double startTime, endTime, globalStartTime, globalEndTime;
 
     MPI_Init(NULL,NULL);
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -53,7 +51,7 @@ void randomIntFrequency(int N)
     MPI_Barrier(comm);
     startTime = MPI_Wtime();
 
-    // Generate local subarray of random integers,Seed RNG based on pid to ensure unique results 
+    // Create local subarray of random ints, seed based on PID for uniqueness
     srand(MPI_Wtime() + p);
     for(i = 0; i < N/m; i++)
     {
@@ -64,7 +62,7 @@ void randomIntFrequency(int N)
         Collect generated subarrays into root array and re-broadcast the whole 
         array to worker nodes. While this communication step is redundant 
         (As frequency counts could just be calculated on the subarrays already 
-        in memory for each process) It would allow for later reuse of this 
+        in memory for each process), it would allow for later reuse of this 
         entire array if desireable. 
     */
     MPI_Gather(localRandoms, N/m, MPI_INT, randomIntegers, N/m, MPI_INT, ROOT, comm);
@@ -102,18 +100,18 @@ void randomIntFrequency(int N)
     // Gets root node to display Results
     if(p == ROOT)
     {
-        // Display calculation time
-        printf("Runtime %f(s).\n", (globalEndTime - globalStartTime));
+        // Display parallel execution time in seconds
+        printf("%f\n", (globalEndTime - globalStartTime));
 
-        // Display Frequency table
-        
+        // Display Frequency table if desired
+        /*
         printf("Value:\tFrequency:\tRelative:\n");
         for(i = 0; i < 10; i++)
         {
             float relativeFrequency = (float)frequencyTable[i] / (float)N;
             printf("[%i] \t%i \t\t%.4f\n", i + 1, frequencyTable[i], relativeFrequency);
         }
-        
+        */
     }
     
     MPI_Finalize();
@@ -131,5 +129,5 @@ void randomIntFrequency(int N)
  * ****************************************************************************/
 int main()
 {
-    randomIntFrequency(12);
+    randomIntFrequency(10000);
 }

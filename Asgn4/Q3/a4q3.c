@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
-#include <time.h>
 
 #define ROOT 0
 
@@ -27,14 +26,18 @@
  * ****************************************************************************/
 void matrixAddition(int N)
 {
-    int p, m;
+    int p, m, sliceSize, i, j;
     double **matrix1, **matrix2, **matrix3, *localRow1, *localRow2, *localRow3;
-    int sliceSize, i, j;
+    double startTime, endTime, globalStartTime, globalEndTime;
 
     MPI_Init(NULL,NULL);
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Comm_rank(comm, &p);
     MPI_Comm_size(comm, &m);
+
+    // Start timing each process
+    MPI_Barrier(comm);
+    startTime = MPI_Wtime();
 
     // Allocate memory for pointers to array columns of size N
     matrix1 = (double **) malloc(N * sizeof(double *));
@@ -63,7 +66,7 @@ void matrixAddition(int N)
     MPI_Scatter(matrix2[0], sliceSize * N, MPI_DOUBLE,localRow2, sliceSize * N, MPI_DOUBLE, ROOT, comm);
 
     // Seed random number generator and offset by pid to ensure unique output
-    srand(time(NULL) + p);
+    srand(MPI_Wtime() + p);
 
     // Have each process initialize its local array slice with random double values
     for (i = 0; i < sliceSize; i++) 
@@ -86,11 +89,20 @@ void matrixAddition(int N)
     }
     MPI_Gather(localRow3, sliceSize * N, MPI_DOUBLE,matrix3[0], sliceSize * N, MPI_DOUBLE, ROOT, comm);
 
+    endTime = MPI_Wtime();
 
-    // Gets root node to display the matrix created
-    /*
+    //  Calculate elapsed runtime over all processes
+    MPI_Reduce(&startTime, &globalStartTime, 1, MPI_DOUBLE, MPI_MIN, ROOT, comm);
+    MPI_Reduce(&endTime, &globalEndTime, 1, MPI_DOUBLE, MPI_MIN, ROOT, comm);
+
+    //  Gets root node to display results
     if (p == ROOT) 
     {
+        //  Display parallel execution time in seconds
+        printf("%f\n", (globalEndTime - globalStartTime));
+
+        //  Display All Matrices if desired
+        /*
         printf("Randomly generated %dx%d array1:\n", N, N);
         for (i = 0; i < N; i++) 
         {
@@ -122,8 +134,9 @@ void matrixAddition(int N)
             }
             printf("\n");
         }
+        */
     }
-    */
+    
 
     // De-allocate memory reserved for matrices
     free(localRow1);
@@ -153,5 +166,5 @@ void matrixAddition(int N)
  * ****************************************************************************/
 int main() 
 {
-    matrixAddition(8);
+    matrixAddition(10000);
 }
