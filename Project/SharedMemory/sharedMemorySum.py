@@ -6,7 +6,7 @@ def calculateSum(numbers, result, lock):
     s = sum(numbers)
     
     #   Show the current thread's sum
-    #print("I HAVE ", s)
+    print("This process has sum: ", s)
     
     with lock:
         result.value += s
