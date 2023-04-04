@@ -27,6 +27,7 @@ void splitAndCorrect(int N)
         //  Set result vector b to all 1's
         for(i = 0; i < N; i ++)
         {
+            //b[i]= alpha*(i-1) + d*(i) + (i+1)  // first and last need fixing
             b[i] = 1;
             printf("b%d:\t[%f]\n",i,b[i]);
         }
@@ -64,49 +65,24 @@ void splitAndCorrect(int N)
     //  (3).    Calc Yi for each process's mini-system
     if(p != 5)
     {
-        for(i = 0; i < (N/m); i++)
+        yi = localB[0];
+        for(i = 1; i < (N/m); i++)
         {
-            if(i == 0)
-            {
-                //  Set Y1 = B1
-                yi = localB[i];
-                printf("P%d At %d, yi is:%f\n", p, i, yi);
-
-                //  TODO -- Save value at this iteration in a vector??
-                yVector[i] = yi;
-            }
-            else
-            {
                 //  Set Yi = Bi - (r1 * Yi-1)
-                yi = localB[i] - (r1 * yi);
+                yVector[i] = localB[i] - (r1 * yVector[i-1]);
                 printf("P%d At %d, yi is:%f\n", p, i, yi);
-
-                //  TODO -- Save value at this iteration in a vector??
-                yVector[i] = yi;
-            }
         }
 
         //  (4).    Calc Xi for each process's mini-system by Work back through values backwards
-        for(i = (N/m) - 1; i >= 0; i--)
+        xVector[N/m-1] = yVector[N/m-1]/r2;
+        for(i = (N/m) - 2; i >= 0; i--)
         {
-            if(i == (N/m) - 1)
-            {
-                //  Set Xn = Yn
-                xi = yVector[i];
-                printf("P%d At %d, xi is:%f\n", p, i, xi);
-
-                //  TODO -- Save value at this iteration in a vector??
-                xVector[i] = xi;
-            }
-            else
-            {
                 //  Set xi = (Yi - Xi+1) / r2
                 xi = (yVector[i] - xi) / r2;          
                 printf("P%d At %d, xi is:%f\n", p, i, xi);
 
                 //  TODO -- Save value at this iteration in a vector??
                 xVector[i] = xi;
-            }
         }
     }
 
