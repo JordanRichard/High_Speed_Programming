@@ -4,14 +4,17 @@
 #include <math.h>
 
 #define ROOT 0
-#define alpha 2
-#define d 10
 
 void splitAndCorrect(int N)
 {
     int p,m,i,j;
     double b[N];
-    double r1,r2,xi,yi;
+    double r1,r2,xi,yi,delta,omega;
+
+    //Define as doubles for precision
+    double alpha = 2;
+    double d = 10;
+
 
     MPI_Init(NULL,NULL);
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -27,8 +30,8 @@ void splitAndCorrect(int N)
         //  Set result vector b to all 1's
         for(i = 0; i < N; i ++)
         {
-            //b[i]= alpha*(i-1) + d*(i) + (i+1)  // first and last need fixing
-            b[i] = 1;
+            b[i]= alpha*(i-1) + d*(i) + (i+1);  // first and last need fixing
+            //b[i] = 1;
             printf("b%d:\t[%f]\n",i,b[i]);
         }
     }
@@ -47,13 +50,13 @@ void splitAndCorrect(int N)
     {
         //  d is negative for quadratic formula
         r2 = (d - sqrt((d * d) - 4 * alpha)) / (2 * alpha);
-        r1 = d - r2;
+        r1 = alpha / r2;
         
         printf("D is negative - r2: %f - r1: %f\n",r2,r1);
     }
     MPI_Barrier(comm);
 
-    //  Scatter RHS vector b across all processes
+    //  Scatter and print RHS vector b across all processes
     MPI_Scatter(b, N/m, MPI_DOUBLE, localB, N/m, MPI_DOUBLE, ROOT, comm);
     printf("P%d:", p);
     for(i=0; i < (N/m); i++)
@@ -61,41 +64,55 @@ void splitAndCorrect(int N)
     printf("\n");
     MPI_Barrier(comm);
 
-
     //  (3).    Calc Yi for each process's mini-system
-    if(p != 5)
+    yVector[0] = localB[0];
+    printf("P%d At 0, yi is:%f\n", p, yVector[0]);
+    for(i = 1; i < (N/m); i++)
     {
-        yi = localB[0];
-        for(i = 1; i < (N/m); i++)
-        {
-                //  Set Yi = Bi - (r1 * Yi-1)
-                yVector[i] = localB[i] - (r1 * yVector[i-1]);
-                printf("P%d At %d, yi is:%f\n", p, i, yi);
-        }
-
-        //  (4).    Calc Xi for each process's mini-system by Work back through values backwards
-        xVector[N/m-1] = yVector[N/m-1]/r2;
-        for(i = (N/m) - 2; i >= 0; i--)
-        {
-                //  Set xi = (Yi - Xi+1) / r2
-                xi = (yVector[i] - xi) / r2;          
-                printf("P%d At %d, xi is:%f\n", p, i, xi);
-
-                //  TODO -- Save value at this iteration in a vector??
-                xVector[i] = xi;
-        }
+        //  Set Yi = Bi - (r1 * Yi-1)
+        yVector[i] = localB[i] - (r1 * yVector[i-1]);
+        printf("P%d At %d, yi is:%f\n", p, i, yVector[i]);
     }
 
+    //  (4).    Calc Xi for each process's mini-system by Work back through values backwards
+    xVector[N/m-1] = yVector[N/m-1]/r2;
+    printf("P%d At %d, xi is:%f\n", p,(N/m-1), xVector[N/m-1]);
+    for(i = (N/m) - 2; i >= 0; i--)
+    {
+        //  Set xi = (Yi - Xi+1) / r2
+        xVector[i] = (yVector[i] - xVector[i+1]) / r2;          
+        printf("P%d At %d, xi is:%f\n", p, i, xVector[i]);
+    }
 
+    //  (5).    Apply correction to each xi value in solution vector
 
+    //  Send last x value this processor to next processor, save as delta
+    // xVector[N/m -1] -> send to p+1
+    delta = xVector[N/m -1];
+    //MPI SEND/RECV delta to next processor
 
+    // Apply P correction down to t == (N/m)/2
+    for(i = 0; i < (N/m)/2; i++)
+    {
+        //  Compute correction (omega) and apply to this xi value
+        omega = (alpha / (alpha - (r1*r1))) * delta * (-1 * r1);
+        xVector[i] = xVector[i] + omega;
+    }    
 
+    // Apply Q correction up to t == (N/m)/2
+    for(i = ((N/m) - 1)/2; i >=0; i--)
+    {
+        //  Compute correction (omega) and apply to this xi value
+        omega = (alpha / (alpha - (r1*r1))) * delta * (-1 * r1);
+        xVector[i] = xVector[i] + omega;
+    }
 
+    
 
     MPI_Finalize();
 }
 
 void main()
 {
-    splitAndCorrect(48);
+    splitAndCorrect(16);
 }
