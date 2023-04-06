@@ -107,6 +107,42 @@ void splitAndCorrect(int N)
         xVector[i] = xVector[i] + omega;
     }
 
+    //Calc rstar
+    //calc t
+
+    if(p == 0)
+    {
+        //First Processor
+
+        // Send last to next
+        // Recv first from next
+
+        //Apply q up
+        // Apply Special P down
+    }
+    else if(p == m)
+    {
+        // Last processor
+        
+        // Recv last from previous
+        // Send first to previous
+        
+        // Apply p down
+    }
+    else
+    {
+        // All other processors p(1 : m-1)
+        
+        // Send last to next
+        // Send first to previous
+        // Recv last from previous
+        // Recv first from next
+        
+        // Apply q up
+        // Apply p down
+
+    
+    }
     
 
     MPI_Finalize();
