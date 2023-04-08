@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <mpi.h>
 
 #define ROOT 0
@@ -129,5 +130,5 @@ void randomIntFrequency(int N)
  * ****************************************************************************/
 int main()
 {
-    randomIntFrequency(10000);
+    randomIntFrequency(500);
 }

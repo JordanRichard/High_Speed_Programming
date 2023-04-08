@@ -1,8 +1,9 @@
 #!/bin/bash
-#SBATCH --time=00:10:00
+#SBATCH --time=00:20:00
 #SBATCH --ntasks=8               # number of MPI processes
+#SBATCH --mem-per-cpu=4G
 ### Compiles and runs a given c program.
-mpicc a4q1.c -lm
+mpicc a4q3.c
 
 ### Runs program 14 times for each process count
 for nthreads in 1 2 4 8

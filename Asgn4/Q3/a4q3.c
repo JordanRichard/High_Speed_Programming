@@ -166,5 +166,5 @@ void matrixAddition(int N)
  * ****************************************************************************/
 int main() 
 {
-    matrixAddition(1000);
+    matrixAddition(10000);
 }
