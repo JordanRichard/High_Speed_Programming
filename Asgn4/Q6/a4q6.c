@@ -13,7 +13,8 @@ void splitAndCorrect(int N)
 
     double alpha = 2;
     double d = 10;
-    double epsilon = pow(2,-8);
+    double epsilon = pow(2,-12
+    );
 
     MPI_Init(NULL,NULL);
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -80,7 +81,7 @@ void splitAndCorrect(int N)
 
     //  calc t = (ln(epsilon) + ln(|d| - |alpha| - 1) - ln(MAX{|r2 / (r2 - r1)|}, 1)) / ln(rStar)
     t = (log(epsilon) + log(fabs(d) - fabs(alpha) - 1) - log(fmax(fabs(r2 / (r2 - r1)),1))) / log(rStar);
-    t = floor(t);       //Round off t
+    t = ceil(t);       //Round off t
     printf("t:%f\n", t);
     
     MPI_Barrier(comm);
@@ -93,15 +94,16 @@ void splitAndCorrect(int N)
         MPI_Recv(&localFirst, 1, MPI_DOUBLE, p + 1, 50, comm, MPI_STATUS_IGNORE);
 
         //  Apply q up
-        omega = (alpha / (alpha - (r1*r1))) * localFirst * (-1 * r1);
-        for(i = 0; i < t; i++)
+        //omega = (alpha / (alpha - (r1*r1))) * localFirst * (-1 * r1);
+        omega = (((r1 * r1) - alpha) * xVector[N/m - 1] + r1 * localFirst) / (alpha - r1*r1) * (-1 / r2);
+        for(i = (N/m - 1); i > t; i--)
         {
             xVector[i] = xVector[i] + omega;
-            omega = omega * (r1 * -1);  //  Update omega
+            omega = omega * (-1 / r1);  //  Update omega
         }
         //  Apply Special P down with different coefficient
-        omega = xVector[0] / (alpha - r1*r1);
-        for(i = (N/m - 1); i > t; i--)
+        omega = -r1 * (xVector[0] / (alpha - r1*r1));
+        for(i = 0; i < t; i++)
         {
             xVector[i] = xVector[i] + omega;
             omega = omega * (r1 * -1);  //  Update omega
@@ -115,7 +117,7 @@ void splitAndCorrect(int N)
        
         //  Apply p down
         omega = (alpha / (alpha - (r1*r1))) * localLast * (-1 * r1);
-        for(i = (N/m - 1); i > t; i--)
+        for(i = 0; i < t; i++)
         {
             xVector[i] = xVector[i] + omega;
             omega = omega * (r1 * -1);  //  Update omega
@@ -132,15 +134,15 @@ void splitAndCorrect(int N)
         MPI_Recv(&localFirst, 1, MPI_DOUBLE, p + 1, 50, comm, MPI_STATUS_IGNORE);
         
         //  Apply q up
-        omega = (alpha / (alpha - (r1*r1))) * localFirst * (-1 * r1);
-        for(i = 0; i < t; i++)
+        omega = (((r1 * r1) - alpha) * xVector[N/m - 1] + r1 * localFirst) / (alpha - r1*r1) * (-1 / r2);
+        for(i = (N/m - 1); i > t; i--)
         {
             xVector[i] = xVector[i] + omega;
-            omega = omega * (r1 * -1);  //  Update omega
+            omega = omega * (-1 / r1);  //  Update omega
         }
         //  Apply p down
         omega = (alpha / (alpha - (r1*r1))) * localLast * (-1 * r1);
-        for(i = (N/m - 1); i > t; i--)
+        for(i = 0; i < t; i++)
         {
             xVector[i] = xVector[i] + omega;
             omega = omega * (r1 * -1);  //  Update omega
@@ -162,5 +164,5 @@ void splitAndCorrect(int N)
 
 void main()
 {
-    splitAndCorrect(64);
+    splitAndCorrect(100);
 }
