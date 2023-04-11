@@ -5,7 +5,6 @@
 
 #define ROOT 0
 
-
 /******************************************************************************
  * 	
  * Driver program to carry out parallel matrix multiplication using MPI for 
@@ -13,15 +12,15 @@
  *
  *  
  * @author	Jordan Alexander Richard
- * @version CS 3123 - Assignment 5 Question 2a
+ * @version CS 3123 - Assignment 5 Question 2b
 ******************************************************************************/
 
 /******************************************************************************
  *  Method: matrixMult: Given a value N, randomly generate 2 NxN matrices and
  *          multiply them together in parallel using MPI. Carrys out matrix 
  *          multiplication by scattering rows of one of the matrices and
- *          having each process multiply the rows by the second matrix
- *          in order to compute each row of the result matrix
+ *          having each process multiply its rows by the second matrix's
+ *          columns in order to compute each row of the result matrix
  *
  *  Input:  N - The number of values to be processed.
  * 
@@ -30,31 +29,31 @@
  * ****************************************************************************/
 void matrixMult(int N) 
 {
+    
     int p,m,i,j,k,sliceSize,startRow,endRow,sum;
-    double startTime, endTime, globalStartTime, globalEndTime;
-    int matrix1[N][N], matrix2[N][N], result[N][N];
 
+    double startTime, endTime, globalStartTime, globalEndTime;
+    
     MPI_Init(NULL,NULL);
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Comm_rank(comm, &p);
     MPI_Comm_size(comm, &m);
 
+    int matrix1[N][N], matrix2[N][N], result[N][N];
+
     // Initialize random seed
     srand(time(NULL));
 
-    if(p == ROOT)
+    // Randomly generate matrixes matrix1,matrix2
+    for (i = 0; i < N; i++) 
     {
-        // Randomly generate matrixes matrix1,matrix2
-        for (i = 0; i < N; i++) 
+        for (j = 0; j < N; j++) 
         {
-            for (j = 0; j < N; j++) 
-            {
-                matrix1[i][j] = rand() % 10 + 1;
-                matrix2[i][j] = rand() % 10 + 1;
-            }
+            matrix1[i][j] = rand() % 10 + 1;
+            matrix2[i][j] = rand() % 10 + 1;
         }
     }
-    
+
     // Start timing each process
     MPI_Barrier(comm);
     startTime = MPI_Wtime();
@@ -67,9 +66,9 @@ void matrixMult(int N)
     else 
         endRow = startRow + sliceSize;
 
-    // Scatter rows of matrix1 and broadcast the entire matrix2 to each process
+    // Scatter matrices to each process
     int localSlice[sliceSize * N];
-    MPI_Scatter(matrix1, sliceSize * N, MPI_INT, localSlice, sliceSize * N, MPI_INT, ROOT, comm);
+    MPI_Bcast(matrix1, N * N, MPI_INT, ROOT, comm);
     MPI_Bcast(matrix2, N * N, MPI_INT, ROOT, comm);
 
     // Compute the product of the scattered rows and the entire matrix2 matrix
@@ -80,7 +79,7 @@ void matrixMult(int N)
             sum = 0;
             for (k = 0; k < N; k++) 
             {
-                sum += localSlice[(i - startRow) * N + k] * matrix2[k][j];
+                sum += matrix1[j][k] * matrix2[k][j];
             }
             result[i][j] = sum;
         }
