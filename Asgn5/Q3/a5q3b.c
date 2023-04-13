@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <mpi.h>
-#include <time.h>
 #include <math.h>
 
 #define ROOT 0
+
 /******************************************************************************
  * 	
  * Driver program to carry out gauss-jacobi iterations to solve a system AX = b
@@ -17,7 +17,7 @@
 
 /******************************************************************************
  *  Method: jacobi: Randomly generates a diagonally-dominant NxN system a and
- *              solves in parallel with openmp using the gauss-jacobi iterative
+ *              solves in parallel with MPI using the gauss-jacobi iterative
  *              method. Stops iterating and displays the approximate solution
  *              after a precision of  < 0.000001 is reached.
  * 
@@ -28,9 +28,9 @@
  * ****************************************************************************/
 void jacobi(int N)
 {
-    double before,after,timeDifference;
+    double startTime,endTime,globalStartTime,globalEndTime;
     double rowSum = 0,xParts = 0;
-    int i,j,p,m,sliceSize,startRow,endRow,flag = 0,iters = 0;
+    int i,j,p,m,sliceSize,offset,flag = 0,iters = 0;
     double epsilon = 0.000001;
 
     double a[N][N];
@@ -46,7 +46,6 @@ void jacobi(int N)
     sliceSize = N/m;
     double localSlice[sliceSize][N];
     double localB[sliceSize];
-    double localX[sliceSize];
     double localNewX[sliceSize];
 
     srand(MPI_Wtime());
@@ -67,112 +66,94 @@ void jacobi(int N)
             a[i][i] = rowSum + (double)(rand() % 10 + 1); 
         }
         
-        //  Randomly initialize the vector b, and set the initial "guess" for vector X to 0's
+        //  Randomly initialize the vector b
         for (i = 0; i < N; i++) 
         {
             b[i] = (double)(rand() % 21 - 10);
-            x[i] = 0;
         }
     }
 
-
-    printf("HI\n");
-    //  Scatter matrix a across processes
-    MPI_Scatter(a,sliceSize * N, MPI_DOUBLE,localSlice, sliceSize * N, MPI_DOUBLE, ROOT, comm);
-    MPI_Scatter(b,sliceSize, MPI_DOUBLE,localB, sliceSize, MPI_DOUBLE, ROOT, comm);
-    MPI_Scatter(x,sliceSize, MPI_DOUBLE,localX, sliceSize, MPI_DOUBLE, ROOT, comm);
-
-
-
-
-    /*
-    //Print matrix
+    //  Create "Guess" vector x,xnew on each process and fill with 0's to start
     for (i = 0; i < N; i++) 
     {
-        for (j = 0; j < N; j++) 
-        {
-            printf("[%.0f]",a[i][j]);
-        }
-        printf("\n");
+        newX[i] = 0;
+        x[i] = 0;
     }
-    printf("\n");
 
-    //  Print Vectors
-    printf("b: ");
-    for (i = 0; i < N; i++) 
-        printf("[%.0f]",b[i]);
-    printf("\n\n");
+    //  Scatter matrix a and vector b across processes
+    MPI_Scatter(a,sliceSize * N, MPI_DOUBLE,localSlice, sliceSize * N, MPI_DOUBLE, ROOT, comm);
+    MPI_Scatter(b,sliceSize, MPI_DOUBLE,localB, sliceSize, MPI_DOUBLE, ROOT, comm);
 
-    printf("x: ");
-    for (i = 0; i < N; i++) 
-        printf("[%.0f]",x[i]);
-    printf("\n\n");
+    // Start timing each process
+    startTime = MPI_Wtime();
 
-    */
+    //  Calc column offset to apply to row diagonals
+    offset = p * (N/m);
 
-    before = MPI_Wtime();
-
-    // Determine the number of rows each process will compute
-    startRow = p * sliceSize;
-    if (p == m - 1) 
-        endRow = N;
-    else 
-        endRow = startRow + sliceSize;
-
-    printf("P:%d start %d end %d ---\n",p,startRow,endRow);
     //  Continue carrying out jacobi iterations until exit condition is met
-    //while(flag != 1)
-    //{
-        printf("--- Iteration %d ---\n",iters+1);
-
-        // Carry out one iteration of the gauss-jacobi method
-        for(i = startRow; i < endRow; i++)
+    while(flag != 1)
+    {
+        // Carry out one iteration of the gauss-jacobi method on this process
+        for(i = 0; i < N/m; i++)
         {
             xParts = localB[i];
             for(j = 0; j < N; j++)
             {
                 //  If we're NOT on the diagonal
-                if(j != i)
+                if(j != i + offset)
                 {  
-                    xParts -= (localSlice[i][j] * localX[j]);
+                    xParts -= (localSlice[i][j] * x[j]);
                 }
             }
-            localNewX[i] = xParts / localSlice[i][i];
-            printf("p%d: x%i: %f\n",p,i,localNewX[i]);
+            localNewX[i] = xParts / localSlice[i][i + offset];
+        }   
 
-        }            
-
-        /*
+        //  Gather newly calculated x values to all processors
+        MPI_Allgather(localNewX, N/m, MPI_DOUBLE, newX, N/m, MPI_DOUBLE, comm);
+        
         //  Check difference in calculated values and stop iterating if small enough
         flag = 1;
         for(i = 0; i < N; i++)
         {
             //Stop testing if any larger than minimum precision
-            if(fabs(x[i] - newX[i]) >= 0.000001)    
+            if(fabs(x[i] - newX[i]) >= epsilon)    
             {
                 //Set flag back to 0 and continue on
                 flag = 0;    
                 break;
             }
         }
-        
-        // Update x vector
-        for(i = 0; i < N; i++)
+
+        //  Update x vector
+        for(i = 0; i < N; i ++)
         {
             x[i] = newX[i];
+        }        
+        
+        iters++;
+    }
+    endTime = MPI_Wtime();
+
+    //  Calculate elapsed runtime over all processes
+    MPI_Reduce(&startTime, &globalStartTime, 1, MPI_DOUBLE, MPI_MIN, ROOT, comm);
+    MPI_Reduce(&endTime, &globalEndTime, 1, MPI_DOUBLE, MPI_MIN, ROOT, comm);
+
+    // Have root display results
+    if(p == 0)
+    {
+        // Display calculated vector x if desired
+        /*
+        printf("After %d iterations:\n",iters+1);
+        for(i = 0; i < N; i++)
+        {
+            printf("x%i: %f\n",i,x[i]);
         }
         */
-        iters++;
-    //}
+        
+        // Displays elapsed runtime
+        printf("%f\n", endTime - startTime);
+    }
 
-
-
-    after = MPI_Wtime();
-    timeDifference = after - before;
-
-    // Displays elapsed runtime
-    printf("%f\n",timeDifference);
-    
     MPI_Finalize();
 }
 
@@ -188,5 +169,5 @@ void jacobi(int N)
  * ****************************************************************************/
 int main()
 {
-    jacobi(4);
+    jacobi(256);
 }
