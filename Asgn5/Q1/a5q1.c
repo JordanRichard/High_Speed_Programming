@@ -29,6 +29,7 @@
 void approximatePi(int N)
 {
     int p,m,i;
+    double startTime,endTime,globalStartTime,globalEndTime;
     double xCoord,yCoord,z,piApproximation;
     int insideCount = 0;
     int totalInsideCount = 0;
@@ -40,6 +41,9 @@ void approximatePi(int N)
 
     srand(MPI_Wtime() + p);
     
+    // Start timing each process
+    startTime = MPI_Wtime();
+
     //  Generate N random coordinates between 0,1 and check if in the unit circle
     for(i = 0; i < N; i++)
     {
@@ -54,6 +58,12 @@ void approximatePi(int N)
 
     //  Combine inside totals
     MPI_Reduce(&insideCount, &totalInsideCount, 1, MPI_INT, MPI_SUM, ROOT, comm);
+
+    endTime = MPI_Wtime();
+
+    //  Calculate elapsed runtime over all processes
+    MPI_Reduce(&startTime, &globalStartTime, 1, MPI_DOUBLE, MPI_MIN, ROOT, comm);
+    MPI_Reduce(&endTime, &globalEndTime, 1, MPI_DOUBLE, MPI_MIN, ROOT, comm);
     
     //  Use totals to calculate estimate of pi, display results
     if(p == ROOT)
@@ -63,6 +73,7 @@ void approximatePi(int N)
         printf("TOTAL POINTS TESTED -- %d\nTOTAL POINTS INSIDE CIRCLE-- %d\n",
             (N * m),totalInsideCount);
         printf("PI: %f\n",piApproximation);
+        printf("Elapsed time: %f\n", endTime - startTime);
     }
 }
 

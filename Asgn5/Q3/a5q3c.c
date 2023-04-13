@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <mpi.h>
+#include <omp.h>
 #include <math.h>
 
 #define ROOT 0
@@ -8,16 +9,16 @@
 /******************************************************************************
  * 	
  * Driver program to carry out gauss-jacobi iterations to solve a system AX = b
- * in parallel using MPI.
+ * in hybrid parallel using MPI and openmp.
  *
  *  
  * @author	Jordan Alexander Richard
- * @version CS 3123 - Assignment 5 Question 3b
+ * @version CS 3123 - Assignment 5 Question 3c
 ******************************************************************************/
 
 /******************************************************************************
  *  Method: jacobi: Randomly generates a diagonally-dominant NxN system a and
- *              solves in parallel with MPI using the gauss-jacobi iterative
+ *              solves in hybrid parallel using the gauss-jacobi iterative
  *              method. Stops iterating and displays the approximate solution
  *              after a precision of  < 0.000001 is reached.
  * 
@@ -63,7 +64,7 @@ void jacobi(int N)
                 rowSum += fabs(a[i][j]);
             }
             //  Add 1:10 to ensure this row is diagonally dominant after filling it
-            a[i][i] = rowSum + (double)(rand() % 10 + 1); 
+            a[i][i] = rowSum + (double)(rand() % 10 + 1);  
         }
         
         //  Randomly initialize the vector b
@@ -93,24 +94,30 @@ void jacobi(int N)
     //  Continue carrying out jacobi iterations until exit condition is met
     while(flag != 1)
     {
-        // Carry out one iteration of the gauss-jacobi method on this process
+        // Carry out one jacobi iteration on this process in parallel with MPI
         for(i = 0; i < N/m; i++)
         {
+            //  Parallelize inner loop using openmp
+            //  Use default number of omp processes as large # causes significant overhead
             xParts = localB[i];
-            for(j = 0; j < N; j++)
+            #pragma omp parallel
             {
-                //  If we're NOT on the diagonal
-                if(j != i + offset)
-                {  
-                    xParts -= (localSlice[i][j] * x[j]);
-                }
+                #pragma omp for
+                    for(j = 0; j < N; j++)
+                    {
+                        //  If we're NOT on the diagonal
+                        if(j != i + offset)
+                        {  
+                            xParts -= (localSlice[i][j] * x[j]);
+                        }
+                    }
             }
             localNewX[i] = xParts / localSlice[i][i + offset];
         }   
 
         //  Gather newly calculated x values to all processors
         MPI_Allgather(localNewX, N/m, MPI_DOUBLE, newX, N/m, MPI_DOUBLE, comm);
-        
+
         //  Check difference in calculated values and stop iterating if small enough
         flag = 1;
         for(i = 0; i < N; i++)
@@ -169,5 +176,5 @@ void jacobi(int N)
  * ****************************************************************************/
 int main()
 {
-    jacobi(160);
+    jacobi(8);
 }

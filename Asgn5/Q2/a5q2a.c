@@ -98,6 +98,8 @@ void matrixMult(int N)
     // Print the result
     if (p == ROOT) 
     {
+        // Print matrices if desired
+        /*
         printf("Matrix matrix1:\n");
         for (i = 0; i < N; i++) 
         {
@@ -127,6 +129,7 @@ void matrixMult(int N)
             }
             printf("\n");
         }
+        */
 
         //  Display parallel execution time in seconds
         printf("%f\n", (globalEndTime - globalStartTime));
@@ -146,5 +149,5 @@ void matrixMult(int N)
  * ****************************************************************************/
 void main()
 {
-    matrixMult(4);
+    matrixMult(512);
 }
